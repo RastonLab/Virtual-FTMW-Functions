@@ -1,0 +1,9 @@
+# used by both flask and jupyter-notebook
+radis
+specutils
+
+# used by flask
+flask
+flask-cors
+wheel
+gunicorn
