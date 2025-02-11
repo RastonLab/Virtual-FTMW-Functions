@@ -7,3 +7,6 @@ flask
 flask-cors
 wheel
 gunicorn
+
+# additional dependency
+pydantic

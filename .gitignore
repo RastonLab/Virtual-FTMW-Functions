@@ -128,5 +128,8 @@ ui-tests/playwright-report
 # VSCode
 .vscode
 
+# IntelliJ
+.idea
+
 # Custom
-venv
+.venv/
