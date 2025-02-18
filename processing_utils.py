@@ -248,18 +248,25 @@ def param_check(params: dict[str, object]) -> bool:
     """
 
     # check if number of parameters is correct
-    if len(params) != 6:
+    if len(params) != 13:
         print("  incorrect amount of params. total params: %s" % (len(params)))
         return False
 
     # check if parameter names are correct
     valid_params = [
+        "beamsplitter",
+        "detector",
+        "medium",
+        "mole",
         "molecule",
-        "stepSize",
-        "frequencyMin",
-        "frequencyMax",
-        "numCyclesPerStep",
-        "microwavePulseWidth",
+        "pressure",
+        "resolution",
+        "scan",
+        "source",
+        "waveMax",
+        "waveMin",
+        "window",
+        "zeroFill",
     ]
 
     for key, value in params.items():

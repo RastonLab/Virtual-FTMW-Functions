@@ -138,7 +138,7 @@ def generate_spectrum(params: dict[str, object]) -> tuple[Spectrum, bool, str]:
             molecule=params["molecule"],
             isotope="1,2,3",
             pressure=params["pressure"],
-            Tgas=294.15,
+            Tgas=1,
             path_length=10,
             wstep=wstep,
             databank="hitran",
