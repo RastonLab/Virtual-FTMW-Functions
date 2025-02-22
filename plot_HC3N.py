@@ -70,7 +70,7 @@ def doppler_broadening(datafile="HCCCN_2.lin"):
     c_SI = 299792458.0         # Speed of light in m/s
     vrms = 1367.31             # Root-mean-squared velocity in m/s
     T = 1.0                    # Temperature in K
-    k = 1.380649e-23           # Boltzmann constant in J/K
+    k = 1.380649 * 10e-23           # Boltzmann constant in J/K
     m_molecule = 51.0294 * 1.66054e-27  # Molecular mass in kg
     ln2 = np.log(2)
 
@@ -90,10 +90,6 @@ def doppler_broadening(datafile="HCCCN_2.lin"):
     # Compute the splitting for the reference line:
     split_ref = 2 * (f_ref / c_SI) * vrms  # in Hz
 
-    # Compute Doppler FWHM for the reference line:
-    FWHM_ref = 2 * (f_ref / c_SI) * np.sqrt(2 * k * T * ln2 / m_molecule)  # in Hz
-    sd = FWHM_ref / (2 * np.sqrt(2 * ln2))  # standard deviation in Hz
-
     # Define a zoom window around the reference line.
     margin = 2 * split_ref
     f_min_zoom = f_ref - margin
@@ -107,6 +103,7 @@ def doppler_broadening(datafile="HCCCN_2.lin"):
     for f, I in zip(line_freq_Hz, line_intensity):
         # Compute splitting for this line:
         split_val = 2 * (f / c_SI) * vrms  # in Hz
+        print(split_val/1e9)
         
         # Compute Doppler FWHM for this line:
         FWHM = 2 * (f / c_SI) * np.sqrt(2 * k * T * ln2 / m_molecule)  # in Hz
