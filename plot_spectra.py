@@ -29,7 +29,7 @@ def fetch_data(endpoint):
     return [], []
 
 # Fetch data from /test endpoint
-x_test, y_test = fetch_data('test')
+# x_test, y_test = fetch_data('test')
 
 # Fetch data from /test_clean endpoint
 x_test_clean, y_test_clean = fetch_data('test_clean')
@@ -39,24 +39,24 @@ plt.figure(figsize=(12, 6))
 
 # Plot for /test endpoint
 # Create a subplot with 1 row and 2 columns
-plt.subplot(1, 2, 1)
+## plt.subplot(1, 2, 1)
 # Plot the processed spectrum
-plt.plot(x_test, y_test, label='Processed Spectrum')
+## plt.plot(x_test, y_test, label='Processed Spectrum')
 # Add title, labels, and legend
-plt.title('Processed Spectrum from /test')
+## plt.title('Processed Spectrum from /test')
 # Set the x and y labels
-plt.xlabel('Wavenumber (cm⁻¹)')
+## plt.xlabel('Wavenumber (cm⁻¹)')
 # Set the y label
-plt.ylabel('Transmittance')
+## plt.ylabel('Transmittance')
 # Add a legend to the plot
-plt.legend()
+## plt.legend()
 
 # Plot for /test_clean endpoint
 plt.subplot(1, 2, 2)
 plt.plot(x_test_clean, y_test_clean, label='Raw Spectrum', color='orange')
 plt.title('Raw Spectrum from /test_clean')
-plt.xlabel('Wavenumber (cm⁻¹)')
-plt.ylabel('Transmittance')
+plt.xlabel('Frequency (GHz)')
+plt.ylabel('Intensity')
 plt.legend()
 
 plt.tight_layout()

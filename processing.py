@@ -136,18 +136,17 @@ def generate_spectrum(params: dict[str, object]) -> tuple[Spectrum, bool, str]:
             WAVEMIN,
             WAVEMAX,
             molecule=params["molecule"],
-            isotope="1,2,3",
+            isotope="1,2,3", 
             pressure=params["pressure"],
             Tgas=1,
             path_length=10,
-            wstep=wstep,
-            databank="hitran",
-            verbose=False,
-            warnings={
-                "AccuracyError": "ignore",
-                "AccuracyWarning": "ignore"},
+            wstep=0.0005,
+            databank="hitran", 
+            verbose=True,
+            warnings={"AccuracyError": "ignore", "AccuracyWarning": "ignore"},
             mole_fraction={params["molecule"]: params["mole"]},
         )
+
     except radis.misc.warning.EmptyDatabaseError:
         return None, True, "There were not enough data points in the requested Wavenumber Range. Please expand your range and try again."
     except Exception as e:

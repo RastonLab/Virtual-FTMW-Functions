@@ -1,4 +1,5 @@
 import json
+import astropy.units as u
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -123,24 +124,24 @@ def test():
 
 @app.route("/test_clean", methods=["GET"])
 def test_clean():
-    # Override the processing module's global constants so the raw spectrum is generated in 0-5 cm⁻¹.
+    # Override the processing module's global constants
     import processing
-    processing.WAVEMIN = 0
-    processing.WAVEMAX = 2
+    processing.WAVEMIN = (2 * u.GHz).to(u.cm**-1, equivalencies=u.spectral()).value
+    processing.WAVEMAX = (40 * u.GHz).to(u.cm**-1, equivalencies=u.spectral()).value
 
     # Define test parameters that match the desired range.
     test_params = {
         "beamsplitter": "AR_ZnSe",
         "detector": "MCT",
-        "medium": "Vacuum",
+        "medium": "vacuum",
         "mole": 1,
         "molecule": "HC3N",
         "pressure": 0.0001,
         "resolution": 0.125,
         "scan": 100,
         "source": 1200,
-        "waveMax": 2,
-        "waveMin": 0,
+        "waveMax": (40 * u.GHz).to(u.cm**-1, equivalencies=u.spectral()).value,
+        "waveMin": (2 * u.GHz).to(u.cm**-1, equivalencies=u.spectral()).value,
         "window": "ZnSe",
         "zeroFill": 2
     }
@@ -152,7 +153,6 @@ def test_clean():
         return jsonify(success=False, text=message)
 
     # Bypass the extra processing (i.e., do not call process_spectrum)
-    # Since the spectrum is already generated in 0-5 cm⁻¹, no cropping is needed.
     x_value, y_value = spectrum.get("transmittance_noslit")
 
     # Return the data as JSON.
