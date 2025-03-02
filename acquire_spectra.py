@@ -3,8 +3,10 @@ import pandas as pd
 from acquire_spectra_utils import (
     get_datafile, 
     param_check, 
-    lorentzian_profile
+    lorentzian_profile,
+    add_white_noise
 )
+import matplotlib.pyplot as plt
 
 def acquire_spectra(params: dict, window=30, resolution=0.001, hwhm=0.007):
     """
@@ -79,6 +81,14 @@ def acquire_spectra(params: dict, window=30, resolution=0.001, hwhm=0.007):
     for local_grid, local_spec in individual_spectra:
         final_spectrum += np.interp(final_grid, local_grid, local_spec, left=0, right=0)
 
+    # Grab noise from params
+    noise = params.get("noise")
+    if noise is not None:
+        final_spectrum = add_white_noise(final_spectrum, noise)
+
+    plt.plot(final_grid, final_spectrum)
+    plt.show()
+
     return {
         "success": True,
         "x": final_grid.tolist(),
@@ -89,7 +99,8 @@ def main():
     params = {
         "molecule": "C7H5N",
         "crop_min": 8206 * 2,
-        "crop_max": 8208 * 2
+        "crop_max": 8208 * 2,
+        "noise": 0.1
     }
     acquire_spectra(params)
 

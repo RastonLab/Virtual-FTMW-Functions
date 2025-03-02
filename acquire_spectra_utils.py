@@ -45,3 +45,10 @@ def param_check(params: dict[str, object]) -> bool:
 def lorentzian_profile(grid, center, hwhm):
     """Calculate the Lorentzian profile on a given grid centered at 'center'."""
     return (1 / np.pi) * (hwhm / ((grid - center)**2 + hwhm**2))
+
+def add_white_noise(spectrum: np.ndarray, noise_level: float) -> np.ndarray:
+    """
+    Adds white noise to the input spectrum.
+    """
+    noise = np.abs(np.random.normal(0, noise_level, spectrum.shape))
+    return spectrum + noise
