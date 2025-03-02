@@ -18,12 +18,6 @@ def get_datafile(molecule: str, directory: str = "linelists") -> str:
 def param_check(params: dict[str, object]) -> bool:
     """
     Parses user provided parameters for validity.
-
-        Parameters:
-            params (dict): The parameters provided by the user
-
-        Returns:
-            True if params are good. Else, returns False
     """
 
     # check if number of parameters is correct
