@@ -52,3 +52,25 @@ def add_white_noise(spectrum: np.ndarray, noise_level: float) -> np.ndarray:
     """
     noise = np.abs(np.random.normal(0, noise_level, spectrum.shape))
     return spectrum + noise
+
+def apply_cavity_mode_response(
+    frequency_grid: np.ndarray,
+    spectrum: np.ndarray,
+    v_res: float = 8206.4,
+    Q: float = 10000,
+    Pmax: float = 1.0
+) -> np.ndarray:
+    """
+    Multiply the spectrum by the cavity mode response
+    """
+    # Compute the linewidth Gamma from the Q factor.
+    gamma = v_res / Q 
+
+    # Compute P(v) for each frequency point in frequency_grid.
+    cavity_response = Pmax * ((gamma/2)**2 / ((frequency_grid - v_res)**2 + (gamma/2)**2))
+
+    # Get white noise for the cavity response.
+    cavity_response = add_white_noise(cavity_response, 0.1)
+
+    # Multiply the original spectrum by the cavity response.
+    return spectrum * cavity_response
