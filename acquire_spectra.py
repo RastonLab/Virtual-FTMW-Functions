@@ -4,11 +4,12 @@ from acquire_spectra_utils import (
     get_datafile, 
     param_check, 
     lorentzian_profile,
-    add_white_noise
+    add_white_noise,
+    apply_cavity_mode_response
 )
 import matplotlib.pyplot as plt
 
-def acquire_spectra(params: dict, window=30, resolution=0.001, hwhm=0.007):
+def acquire_spectra(params: dict, window=30, resolution=0.001, hwhm=0.007, v_res=8206.4, Q=10000, Pmax=1.0):
     """
     For each spectral line in the data file corresponding to the molecule specified in params,
     create a local frequency grid (spanning ±window around its doubled frequency) and compute its
@@ -86,8 +87,17 @@ def acquire_spectra(params: dict, window=30, resolution=0.001, hwhm=0.007):
     if noise is not None:
         final_spectrum = add_white_noise(final_spectrum, noise)
 
+    # Apply cavity mode response
+    final_spectrum = apply_cavity_mode_response(final_grid, final_spectrum, v_res*2, Q, Pmax)
+
     plt.plot(final_grid, final_spectrum)
     plt.show()
+
+    output_df = pd.DataFrame({
+        "Frequency (MHz)": final_grid,
+        "Intensity": final_spectrum
+    })
+    output_df.to_csv("spectrum.csv", index=False)
 
     return {
         "success": True,
@@ -98,8 +108,8 @@ def acquire_spectra(params: dict, window=30, resolution=0.001, hwhm=0.007):
 def main():
     params = {
         "molecule": "C7H5N",
-        "crop_min": 8206 * 2,
-        "crop_max": 8208 * 2,
+        "crop_min": 8204 * 2,
+        "crop_max": 8209 * 2,
         "noise": 0.1
     }
     acquire_spectra(params)
