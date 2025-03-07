@@ -95,6 +95,12 @@ def acquire_spectra(params: dict, window=30, resolution=0.001, hwhm=0.007, v_res
     plt.plot(final_grid, final_spectrum)
     plt.show()
 
+    output_df = pd.DataFrame({
+        "Frequency (MHz)": final_grid,
+        "Intensity": final_spectrum
+    })
+    output_df.to_csv("spectrum.csv", index=False)
+
     return {
         "success": True,
         "x": final_grid.tolist(),
