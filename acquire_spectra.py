@@ -82,22 +82,15 @@ def acquire_spectra(params: dict, window=30, resolution=0.001, hwhm=0.007, v_res
     for local_grid, local_spec in individual_spectra:
         final_spectrum += np.interp(final_grid, local_grid, local_spec, left=0, right=0)
 
-    # Grab noise from params
-    noise = params.get("noise")
-    if noise is not None:
-        final_spectrum = add_white_noise(final_spectrum, noise)
+    # Add white noise to the final spectrum, depending on the number of cycles per step.
+    cyclesPerStep = params.get("numCyclesPerStep")
+    final_spectrum = add_white_noise(final_spectrum, cyclesPerStep, is_cavity_mode=False)
 
     # Apply cavity mode response
-    final_spectrum = apply_cavity_mode_response(final_grid, final_spectrum, v_res*2, Q, Pmax)
+    final_spectrum = apply_cavity_mode_response(params, final_grid, final_spectrum, v_res*2, Q, Pmax)
 
     plt.plot(final_grid, final_spectrum)
     plt.show()
-
-    output_df = pd.DataFrame({
-        "Frequency (MHz)": final_grid,
-        "Intensity": final_spectrum
-    })
-    output_df.to_csv("spectrum.csv", index=False)
 
     return {
         "success": True,
@@ -110,7 +103,7 @@ def main():
         "molecule": "C7H5N",
         "crop_min": 8204 * 2,
         "crop_max": 8209 * 2,
-        "noise": 0.1
+        "numCyclesPerStep": 1
     }
     acquire_spectra(params)
 
