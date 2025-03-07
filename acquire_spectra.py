@@ -89,6 +89,9 @@ def acquire_spectra(params: dict, window=30, resolution=0.001, hwhm=0.007, v_res
     # Apply cavity mode response
     final_spectrum = apply_cavity_mode_response(params, final_grid, final_spectrum, v_res*2, Q, Pmax)
 
+    # Take absolute value of the final spectrum.
+    final_spectrum = np.abs(final_spectrum)
+
     plt.plot(final_grid, final_spectrum)
     plt.show()
 
