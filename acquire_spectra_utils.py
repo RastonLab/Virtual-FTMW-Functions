@@ -53,9 +53,9 @@ def add_white_noise(spectrum: np.ndarray, num_cycles_per_step: float, is_cavity_
     if is_cavity_mode:
         noise_level = 0.1 / np.sqrt(num_cycles_per_step)
     else:
-        noise_level = 0.0002 / np.sqrt(num_cycles_per_step)
+        noise_level = 0.002 / np.sqrt(num_cycles_per_step)
 
-    noise = np.abs(np.random.normal(0, noise_level, spectrum.shape))
+    noise = np.random.normal(0, noise_level, spectrum.shape)
     return spectrum + noise
 
 def apply_cavity_mode_response(
