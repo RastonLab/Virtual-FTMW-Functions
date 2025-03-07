@@ -46,14 +46,20 @@ def lorentzian_profile(grid, center, hwhm):
     """Calculate the Lorentzian profile on a given grid centered at 'center'."""
     return (1 / np.pi) * (hwhm / ((grid - center)**2 + hwhm**2))
 
-def add_white_noise(spectrum: np.ndarray, noise_level: float) -> np.ndarray:
+def add_white_noise(spectrum: np.ndarray, num_cycles_per_step: float, is_cavity_mode: bool) -> np.ndarray:
     """
     Adds white noise to the input spectrum.
     """
+    if is_cavity_mode:
+        noise_level = 0.1 / np.sqrt(num_cycles_per_step)
+    else:
+        noise_level = 0.0002 / np.sqrt(num_cycles_per_step)
+
     noise = np.abs(np.random.normal(0, noise_level, spectrum.shape))
     return spectrum + noise
 
 def apply_cavity_mode_response(
+    params: dict[str, object],
     frequency_grid: np.ndarray,
     spectrum: np.ndarray,
     v_res: float = 8206.4,
@@ -69,8 +75,11 @@ def apply_cavity_mode_response(
     # Compute P(v) for each frequency point in frequency_grid.
     cavity_response = Pmax * ((gamma/2)**2 / ((frequency_grid - v_res)**2 + (gamma/2)**2))
 
+    # Grab number of cycles per step from params.
+    num_cycles_per_step = params.get("numCyclesPerStep")
+
     # Get white noise for the cavity response.
-    cavity_response = add_white_noise(cavity_response, 0.1)
+    cavity_response = add_white_noise(cavity_response, num_cycles_per_step, is_cavity_mode=True)
 
     # Multiply the original spectrum by the cavity response.
     return spectrum * cavity_response
