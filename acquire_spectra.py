@@ -31,8 +31,8 @@ def acquire_spectra(params: dict, window=30, resolution=0.001, hwhm=0.007, v_res
     datafile = get_datafile(molecule)
     
     # Optionally get crop_min and crop_max from params.
-    crop_min = params.get("crop_min", None)
-    crop_max = params.get("crop_max", None)
+    crop_min = params.get("frequencyMin", None)
+    crop_max = params.get("frequencyMax", None)
     
     # Read the data file.
     df = pd.read_csv(datafile, sep=r"\s+", header=None, names=["Frequency", "Intensity"])
@@ -110,9 +110,11 @@ def acquire_spectra(params: dict, window=30, resolution=0.001, hwhm=0.007, v_res
 def main():
     params = {
         "molecule": "C7H5N",
-        "crop_min": 8204 * 2,
-        "crop_max": 8209 * 2,
-        "numCyclesPerStep": 1
+        "numCyclesPerStep": 1,
+        "frequencyMode": "range",
+        "stepSize": 0.01,
+        "frequencyMin": 8204 * 2,
+        "frequencyMax": 8209 * 2,
     }
     acquire_spectra(params)
 

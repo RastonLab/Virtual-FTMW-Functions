@@ -69,16 +69,31 @@ def apply_cavity_mode_response(
     """
     Multiply the spectrum by the cavity mode response
     """
-    # Compute the linewidth Gamma from the Q factor.
-    gamma = v_res / Q 
+    frequencyMode = params.get("frequencyMode", "single")
+    num_cycles_per_step = params.get("numCyclesPerStep", 1)
 
-    # Compute P(v) for each frequency point in frequency_grid.
-    cavity_response = Pmax * ((gamma/2)**2 / ((frequency_grid - v_res)**2 + (gamma/2)**2))
-
-    # Grab number of cycles per step from params.
-    num_cycles_per_step = params.get("numCyclesPerStep")
-
-    # Get white noise for the cavity response.
+    if frequencyMode == "single":
+        # Single cavity mode centered at v_res.
+        gamma = v_res / Q
+        cavity_response = Pmax * ((gamma / 2) ** 2 / ((frequency_grid - v_res) ** 2 + (gamma / 2) ** 2))
+        
+    elif frequencyMode == "range":
+        # In range mode, we require frequencyMin, frequencyMax, and stepSize.
+        frequency_min = params.get("frequencyMin")
+        frequency_max = params.get("frequencyMax")
+        stepSize = params.get("stepSize")
+        if frequency_min is None or frequency_max is None or stepSize is None:
+            raise ValueError("For frequency range mode, 'frequencyMin', 'frequencyMax', and 'stepSize' must be provided.")
+        
+        # Create a list of cavity mode centers, separated by stepSize.
+        centers = np.arange(frequency_min, frequency_max + stepSize, stepSize)
+        cavity_response = np.zeros_like(frequency_grid)
+        for center in centers:
+            gamma = center / Q 
+            response = Pmax * ((gamma / 2) ** 2 / ((frequency_grid - center) ** 2 + (gamma / 2) ** 2))
+            cavity_response += response
+    
+    # Add white noise to the cavity response.
     cavity_response = add_white_noise(cavity_response, num_cycles_per_step, is_cavity_mode=True)
 
     # Multiply the original spectrum by the cavity response.
