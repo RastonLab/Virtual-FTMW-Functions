@@ -9,6 +9,7 @@ def get_datafile(molecule: str, directory: str = "linelists") -> str:
     """
     molecule_to_file = {
         "C7H5N": "benzonitrile.dat",
+        "HC7N": "HC7N.dat",
     }
     if molecule not in molecule_to_file:
         raise ValueError(f"No data file mapping found for molecule '{molecule}'.")

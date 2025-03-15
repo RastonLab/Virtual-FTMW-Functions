@@ -113,10 +113,10 @@ def main():
     params = {
         "molecule": "C7H5N",
         "numCyclesPerStep": 1,
-        "frequencyMode": "single",
+        "frequencyMode": "range",
         "stepSize": 2,
-        "frequencyMin": 8204,
-        "frequencyMax": 8209,
+        "frequencyMin": 16476,
+        "frequencyMax": 16486,
         "vres": 8206.4,
     }
     acquire_spectra(params)
