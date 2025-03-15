@@ -71,7 +71,7 @@ def apply_cavity_mode_response(
     """
     frequencyMode = params.get("frequencyMode", "single")
     num_cycles_per_step = params.get("numCyclesPerStep", 1)
-
+    
     if frequencyMode == "single":
         # Single cavity mode centered at v_res.
         gamma = v_res / Q

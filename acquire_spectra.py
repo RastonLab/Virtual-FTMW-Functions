@@ -9,7 +9,7 @@ from acquire_spectra_utils import (
 )
 import matplotlib.pyplot as plt
 
-def acquire_spectra(params: dict, window=30, resolution=0.001, hwhm=0.007, v_res=8206.4, Q=10000, Pmax=1.0):
+def acquire_spectra(params: dict, window=25, resolution=0.001, hwhm=0.007, Q=10000, Pmax=1.0):
     """
     For each spectral line in the data file corresponding to the molecule specified in params,
     create a local frequency grid (spanning ±window around its doubled frequency) and compute its
@@ -26,13 +26,25 @@ def acquire_spectra(params: dict, window=30, resolution=0.001, hwhm=0.007, v_res
 
     # Retrieve the molecule parameter from params.
     molecule = params.get("molecule")
+
+    # Retrieve vres parameter from params.
+    v_res = params.get("vres")
     
     # Use the helper function to obtain the correct data file path.
     datafile = get_datafile(molecule)
     
-    # Optionally get crop_min and crop_max from params.
-    crop_min = params.get("frequencyMin", None)
-    crop_max = params.get("frequencyMax", None)
+    # Determine cropping bounds based on frequency mode.
+    frequencyMode = params.get("frequencyMode", "single")
+    if frequencyMode == "single":
+        crop_min = v_res - window
+        crop_max = v_res + window
+    else:
+        frequency_min = params.get("frequencyMin")
+        frequency_max = params.get("frequencyMax")
+        if frequency_min is None or frequency_max is None:
+            raise ValueError("For frequency range mode, 'frequencyMin' and 'frequencyMax' must be provided.")
+        crop_min = frequency_min - window
+        crop_max = frequency_max + window
     
     # Read the data file.
     df = pd.read_csv(datafile, sep=r"\s+", header=None, names=["Frequency", "Intensity"])
@@ -45,19 +57,15 @@ def acquire_spectra(params: dict, window=30, resolution=0.001, hwhm=0.007, v_res
     c_SI = 299792458.0    # Speed of light in m/s
     vrms = 1760.0         # Helium velocity in m/s
 
-    # Double the frequencies.
-    doubled_line_freq = line_freq * 2
-
-    # If cropping is specified, filter out spectral lines that do not contribute.
+    # Filter out spectral lines that are outside the cropping bounds.
     if crop_min is not None and crop_max is not None:
-        mask_lines = (doubled_line_freq + window >= crop_min) & (doubled_line_freq - window <= crop_max)
-        line_freq = line_freq[mask_lines]
+        mask_lines = (line_freq + window >= crop_min) & (line_freq - window <= crop_max)
         line_intensity = line_intensity[mask_lines]
-        doubled_line_freq = doubled_line_freq[mask_lines]
+        line_freq = line_freq[mask_lines]
 
     # Collect individual spectra (local grid and corresponding spectrum).
     individual_spectra = []
-    for f, I in zip(doubled_line_freq, line_intensity):
+    for f, I in zip(line_freq, line_intensity):
         local_grid = np.arange(f - window, f + window, resolution)
         split_val = 2 * (f / c_SI) * vrms
         split = f + split_val
@@ -69,13 +77,7 @@ def acquire_spectra(params: dict, window=30, resolution=0.001, hwhm=0.007, v_res
         individual_spectra.append((local_grid, local_spectrum))
     
     # Define the overall frequency grid.
-    if crop_min is not None and crop_max is not None:
-        final_grid = np.arange(crop_min, crop_max, resolution)
-    else:
-        overall_min = min(local_grid[0] for local_grid, _ in individual_spectra)
-        overall_max = max(local_grid[-1] for local_grid, _ in individual_spectra)
-        final_grid = np.arange(overall_min, overall_max, resolution)
-    
+    final_grid = np.arange(crop_min, crop_max, resolution)
     final_spectrum = np.zeros_like(final_grid, dtype=float)
     
     # Interpolate each individual spectrum onto the overall grid and sum them.
@@ -87,7 +89,7 @@ def acquire_spectra(params: dict, window=30, resolution=0.001, hwhm=0.007, v_res
     final_spectrum = add_white_noise(final_spectrum, cyclesPerStep, is_cavity_mode=False)
 
     # Apply cavity mode response
-    final_spectrum = apply_cavity_mode_response(params, final_grid, final_spectrum, v_res*2, Q, Pmax)
+    final_spectrum = apply_cavity_mode_response(params, final_grid, final_spectrum, v_res, Q, Pmax)
 
     # Take absolute value of the final spectrum.
     final_spectrum = np.abs(final_spectrum)
@@ -111,10 +113,11 @@ def main():
     params = {
         "molecule": "C7H5N",
         "numCyclesPerStep": 1,
-        "frequencyMode": "range",
-        "stepSize": 0.01,
-        "frequencyMin": 8204 * 2,
-        "frequencyMax": 8209 * 2,
+        "frequencyMode": "single",
+        "stepSize": 2,
+        "frequencyMin": 8204,
+        "frequencyMax": 8209,
+        "vres": 8206.4,
     }
     acquire_spectra(params)
 
