@@ -9,7 +9,7 @@ from acquire_spectra_utils import (
 )
 import matplotlib.pyplot as plt
 
-def acquire_spectra(params: dict, window=25, resolution=0.001, hwhm=0.007, Q=10000, Pmax=1.0):
+def acquire_spectra(params: dict, window=25, resolution=0.001, fwhm=0.007, Q=10000, Pmax=1.0):
     """
     For each spectral line in the data file corresponding to the molecule specified in params,
     create a local frequency grid (spanning ±window around its doubled frequency) and compute its
@@ -67,11 +67,13 @@ def acquire_spectra(params: dict, window=25, resolution=0.001, hwhm=0.007, Q=100
     individual_spectra = []
     for f, I in zip(line_freq, line_intensity):
         local_grid = np.arange(f - window, f + window, resolution)
-        split_val = 2 * (f / c_SI) * vrms
-        split = f + split_val
+        split_val = (f / c_SI) * vrms
+        add_split = (f + split_val)
+        subtract_split = (f - split_val)
 
-        profile_main = I * lorentzian_profile(local_grid, f, hwhm)
-        profile_split = I * lorentzian_profile(local_grid, split, hwhm)
+        profile_main = I * lorentzian_profile(local_grid, add_split, fwhm)
+        profile_split = I * lorentzian_profile(local_grid, subtract_split, fwhm)
+        
         local_spectrum = profile_main + profile_split
 
         individual_spectra.append((local_grid, local_spectrum))
