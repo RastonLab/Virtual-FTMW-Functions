@@ -85,6 +85,17 @@ def acquire_spectra(params: dict, window=25, resolution=0.001, fwhm=0.007, Q=100
     # Take absolute value of the final spectrum.
     final_spectrum = np.abs(final_spectrum)
 
+    output_df = pd.DataFrame({
+        "Frequency (MHz)": final_grid,
+        "Intensity": final_spectrum
+    })
+
+    # Format the Frequency column to show 3 decimals and the Intensity column in scientific notation with 4 significant figures.
+    output_df['Frequency (MHz)'] = output_df['Frequency (MHz)'].apply(lambda x: f"{x:.3f}")
+    output_df['Intensity'] = output_df['Intensity'].apply(lambda x: f"{x:.3e}")
+
+    output_df.to_csv("spectrum.csv", index=False, compression="gzip")
+
     return {
         "success": True,
         "x": final_grid.tolist(),
