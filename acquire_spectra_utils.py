@@ -22,7 +22,7 @@ def param_check(params: dict[str, object]) -> bool:
     """
 
     # check if number of parameters is correct
-    if len(params) != 6:
+    if len(params) != 11:
         print("incorrect amount of params. total params: %s" % (len(params)))
         return False
 
@@ -34,6 +34,11 @@ def param_check(params: dict[str, object]) -> bool:
         "frequencyMax",
         "numCyclesPerStep",
         "microwavePulseWidth",
+        "mwBand",
+        "repetitionRate",
+        "molecularPulseWidth",
+        "acquisitionType",
+        "vres",
     ]
 
     for key, value in params.items():
@@ -71,7 +76,7 @@ def apply_cavity_mode_response(
     """
     Multiply the spectrum by the cavity mode response
     """
-    frequencyMode = params.get("frequencyMode", "single")
+    frequencyMode = params.get("acquisitionType", "single")
     num_cycles_per_step = params.get("numCyclesPerStep", 1)
     
     if frequencyMode == "single":

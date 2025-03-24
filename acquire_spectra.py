@@ -2,12 +2,10 @@ import numpy as np
 import pandas as pd
 from acquire_spectra_utils import (
     get_datafile, 
-    param_check, 
     lorentzian_profile,
     add_white_noise,
     apply_cavity_mode_response
 )
-import matplotlib.pyplot as plt
 
 def acquire_spectra(params: dict, window=25, resolution=0.001, fwhm=0.007, Q=10000, Pmax=1.0):
     """
@@ -16,14 +14,6 @@ def acquire_spectra(params: dict, window=25, resolution=0.001, fwhm=0.007, Q=100
     broadened spectrum using a Lorentzian profile. The local spectra are then interpolated onto a 
     common grid and summed to produce the final spectrum.
     """
-
-    # verify user input is valid
-    # if not param_check(params):
-        # return {
-           # "success": False,
-           # "text": "One of the given parameters was invalid. Please change some settings and try again.",
-       # }
-
     # Retrieve the molecule parameter from params.
     molecule = params.get("molecule")
 
@@ -34,7 +24,7 @@ def acquire_spectra(params: dict, window=25, resolution=0.001, fwhm=0.007, Q=100
     datafile = get_datafile(molecule)
     
     # Determine cropping bounds based on frequency mode.
-    frequencyMode = params.get("frequencyMode", "single")
+    frequencyMode = params.get("acquisitionType", "single")
     if frequencyMode == "single":
         crop_min = v_res - window
         crop_max = v_res + window
@@ -96,32 +86,19 @@ def acquire_spectra(params: dict, window=25, resolution=0.001, fwhm=0.007, Q=100
     # Take absolute value of the final spectrum.
     final_spectrum = np.abs(final_spectrum)
 
-    plt.plot(final_grid, final_spectrum)
-    plt.show()
-
     output_df = pd.DataFrame({
         "Frequency (MHz)": final_grid,
         "Intensity": final_spectrum
     })
-    output_df.to_csv("spectrum.csv", index=False)
+
+    # Format the Frequency column to show 3 decimals and the Intensity column in scientific notation with 4 significant figures.
+    output_df['Frequency (MHz)'] = output_df['Frequency (MHz)'].apply(lambda x: f"{x:.3f}")
+    output_df['Intensity'] = output_df['Intensity'].apply(lambda x: f"{x:.3e}")
+
+    output_df.to_csv("spectrum.csv", index=False, compression="gzip")
 
     return {
         "success": True,
         "x": final_grid.tolist(),
         "y": final_spectrum.tolist(),
     }
-
-def main():
-    params = {
-        "molecule": "C7H5N",
-        "numCyclesPerStep": 1,
-        "frequencyMode": "range",
-        "stepSize": 2,
-        "frequencyMin": 16476,
-        "frequencyMax": 16486,
-        "vres": 8206.4,
-    }
-    acquire_spectra(params)
-
-if __name__ == '__main__':
-    main()
