@@ -2,8 +2,7 @@ import json
 
 from flask import Flask, request
 from flask_cors import CORS
-from acquire_spectra_utils import param_check
-from acquire_spectra import acquire_spectra
+from acquire_spectra import (acquire_spectra, find_peaks)
 
 app = Flask(__name__)
 CORS(app)
@@ -24,16 +23,19 @@ def ftmw() -> str:
 def acquire_spectrum() -> dict[bool, list[float], list[float]]:
     # put incoming JSON into a dictionary
     params = json.loads(request.data)
-
-    # verify user input is valid
-    if not param_check(params):
-        return {
-            "success": False,
-            "text": "One of the given parameters was invalid. Please change some settings and try again.",
-        }
     
     # convert dictionary values to strings and return as JSON
     return acquire_spectra(params)
+
+@app.route("/find_peaks", methods=["POST"])
+def handle_peaks() -> dict[bool, dict[float, float], str]:
+    params = json.loads(request.data)
+
+    return find_peaks(
+        params["x"],
+        params["y"],
+        float(params["threshold"]),
+    )
 
 # set debug to false in production environment
 if __name__ == "__main__":
