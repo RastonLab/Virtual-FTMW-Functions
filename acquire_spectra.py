@@ -4,8 +4,11 @@ from acquire_spectra_utils import (
     get_datafile, 
     lorentzian_profile,
     add_white_noise,
-    apply_cavity_mode_response
+    apply_cavity_mode_response,
+    param_check,
 )
+from radis import Spectrum
+from specutils.fitting import find_lines_threshold
 
 def acquire_spectra(params: dict, window=25, resolution=0.001, fwhm=0.007, Q=10000, Pmax=1.0):
     """
@@ -14,6 +17,13 @@ def acquire_spectra(params: dict, window=25, resolution=0.001, fwhm=0.007, Q=100
     broadened spectrum using a Lorentzian profile. The local spectra are then interpolated onto a 
     common grid and summed to produce the final spectrum.
     """
+    # verify user input is valid
+    if not param_check(params):
+        return {
+            "success": False,
+            "error": "One of the given parameters was invalid. Please change some settings and try again.",
+        }
+    
     # Retrieve the molecule parameter from params.
     molecule = params.get("molecule")
 
@@ -95,10 +105,51 @@ def acquire_spectra(params: dict, window=25, resolution=0.001, fwhm=0.007, Q=100
     output_df['Frequency (MHz)'] = output_df['Frequency (MHz)'].apply(lambda x: f"{x:.3f}")
     output_df['Intensity'] = output_df['Intensity'].apply(lambda x: f"{x:.3e}")
 
-    output_df.to_csv("spectrum.csv", index=False, compression="gzip")
+    output_df.to_csv("spectrum.csv", index=False)
 
     return {
         "success": True,
         "x": final_grid.tolist(),
         "y": final_spectrum.tolist(),
     }
+
+def find_peaks(x_data: list[float], y_data: list[float], threshold: float = 0) -> tuple[dict[float, float], str]:
+    '''
+    Finds the peaks in provided data within a certain range and threshold.
+
+        Parameters:
+            x_data (list[float]): the x-values of the data to analyze
+            y_data (list[float]): the y-values of the data to analyze
+            threshold (float): the lowest y-value to concider a peak
+
+        Returns:
+            a tuple containing a dictionary of x and y-values of the peaks
+            found and a string containing any error message that may have 
+            been encountered
+    '''
+    try:
+        # Make a spectrum out of the provided x and y-values
+        spectrum = Spectrum.from_array(
+            x_data, y_data, "absorbance_noslit", wunit="", unit=""
+        )
+        new_spec = (
+            spectrum.to_specutils()
+        )
+        # Gets all the peaks data found in the spectrum
+        lines = find_lines_threshold(new_spec, noise_factor=1)
+    except:
+        return {
+            "success": False,
+            "error": "Unable to find peaks with the given data and settings. Please adjust your settings and try again."
+        },
+
+    # Checks the data in lines and pulls out the data that matches our specifications
+    peaks = {}
+    for num, peak_type, _ in lines:
+        index = x_data.index(float(num.value))
+        # Makes sure the peak is an emmission peak and is at or obove our threshold
+        if peak_type == "emission" and y_data[index] >= threshold:
+            peaks[round(float(num.value), 4)] = round(y_data[index], 4)
+
+    # Return the data that matches our specifications
+    return {"success": True, "peaks": peaks}
