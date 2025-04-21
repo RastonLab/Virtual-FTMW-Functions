@@ -139,7 +139,6 @@ def find_peaks(x_data: list[float], y_data: list[float], threshold: float = 0) -
             # Check if the y value is above or equal to the threshold
             if y >= threshold:
                 peaks[round(x, 4)] = round(y, 4)
-        print(y_data)
         return {"success": True, "peaks": peaks}
     except Exception as e:
         return {"success": False, "error": f"An error occurred: {e}"}
