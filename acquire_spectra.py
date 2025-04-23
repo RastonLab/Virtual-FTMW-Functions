@@ -7,8 +7,7 @@ from acquire_spectra_utils import (
     apply_cavity_mode_response,
     param_check,
 )
-from radis import Spectrum
-from specutils.fitting import find_lines_threshold
+from scipy.signal import find_peaks as fp
 
 def acquire_spectra(params: dict, window=25, resolution=0.001, fwhm=0.007, Q=10000, Pmax=1.0):
     """
@@ -96,49 +95,37 @@ def acquire_spectra(params: dict, window=25, resolution=0.001, fwhm=0.007, Q=100
     # Take absolute value of the final spectrum.
     final_spectrum = np.abs(final_spectrum)
 
-    output_df = pd.DataFrame({
-        "Frequency (MHz)": final_grid,
-        "Intensity": final_spectrum
-    })
-
-    # Format the Frequency column to show 3 decimals and the Intensity column in scientific notation with 4 significant figures.
-    output_df['Frequency (MHz)'] = output_df['Frequency (MHz)'].apply(lambda x: f"{x:.3f}")
-    output_df['Intensity'] = output_df['Intensity'].apply(lambda x: f"{x:.3e}")
-
-    output_df.to_csv("spectrum.csv", index=False)
-
     return {
         "success": True,
         "x": final_grid.tolist(),
         "y": final_spectrum.tolist(),
     }
 
-def find_peaks(x_data: list[float], y_data: list[float], threshold: float = 0) -> dict:
+def find_peaks(
+    x_data: list[float],
+    y_data: list[float],
+    threshold: float = 0,
+    min_distance: int = 100,
+) -> dict:
     """
-    Filters the provided data and returns only the x and y values 
-    where the y value meets or exceeds the threshold.
-
-    Parameters:
-        x_data (list[float]): The x-values of the data.
-        y_data (list[float]): The y-values of the data.
-        threshold (float): The minimum y-value required to consider 
-                           a point as a peak.
-
-    Returns:
-        dict: A dictionary containing:
-              - "success": A boolean indicating if the operation succeeded.
-              - "peaks": A dictionary mapping x-values (rounded to 4 decimals) 
-                         to their y-values (rounded to 4 decimals) for the points 
-                         above the threshold.
-              - "error": (Optional) An error message if an exception was encountered.
+    Use scipy.signal.find_peaks to locate peaks in y_data above an absolute threshold.
     """
     try:
-        peaks = {}
-        # Iterate over paired x and y values
-        for x, y in zip(x_data, y_data):
-            # Check if the y value is above or equal to the threshold
-            if y >= threshold:
-                peaks[round(x, 4)] = round(y, 4)
-        return {"success": True, "peaks": peaks}
+        x = np.array(x_data)
+        y = np.array(y_data)
+
+        lines, props = fp(
+            y,
+            height=threshold,
+            distance=min_distance,
+        )
     except Exception as e:
-        return {"success": False, "error": f"An error occurred: {e}"}
+        return {"success": False, "error": str(e)}
+
+    peaks = {}
+    for line in lines:
+        freq = x[line]
+        intensity = y[line]
+        peaks[f"{freq:.4f}"] = f"{intensity:.4f}"
+
+    return {"success": True, "peaks": peaks}
