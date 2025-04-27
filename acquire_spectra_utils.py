@@ -8,8 +8,14 @@ def get_datafile(molecule: str, directory: str = "linelists") -> str:
     in the dictionary below.
     """
     molecule_to_file = {
-        "C7H5N": "benzonitrile.dat",
+        "C6H5CN": "C6H5CN.dat",
         "HC7N": "HC7N.dat",
+        "CH2CHCN": "CH2CHCN.dat",
+        "CH2CHOH": "CH2CHOH.dat",
+        "HOCH2CH2OH": "HOCH2CH2OH.dat",
+        "NH2CONH2": "NH2CONH2.dat",
+        "OC3S": "OC3S.dat",
+        "OCS": "OCS.dat",
     }
     if molecule not in molecule_to_file:
         raise ValueError(f"No data file mapping found for molecule '{molecule}'.")
