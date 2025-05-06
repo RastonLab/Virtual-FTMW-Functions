@@ -97,8 +97,8 @@ def acquire_spectra(params: dict, window=25, resolution=0.001, fwhm=0.007, Q=100
 
     return {
         "success": True,
-        "x": final_grid.tolist(),
-        "y": final_spectrum.tolist(),
+        "x": [f"{xi:.4f}" for xi in final_grid],
+        "y": [f"{yi:.6f}" for yi in final_spectrum],
     }
 
 def find_peaks(
