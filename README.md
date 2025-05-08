@@ -2,6 +2,16 @@
 
 This repository provides the Flask back‑end for the Raston Lab [Virtual FTMW Spectrometer](https://github.com/FTMW-Scientific-Simulator/Virtual-FTMW-Spectrometer).
 
+## Installation
+
+```bash
+git clone https://github.com/FTMW-Scientific-Simulator/Virtual-FTMW-Spectrometer
+cd Virtual-FTMW-Functions
+python3 -m venv .venv
+pip install -r requirements.txt
+python app.py
+```
+
 ## Flask
 
 * app.py
@@ -53,7 +63,7 @@ This repository provides the Flask back‑end for the Raston Lab [Virtual FTMW S
 
   * Implements two main functions:
 
-  ### `acquire_spectra(params, window=25, resolution=0.001, fwhm=0.007, Q=10000, Pmax=1.0)`
+  `acquire_spectra(params, window=25, resolution=0.001, fwhm=0.007, Q=10000, Pmax=1.0)`
 
   1. Validates `params` with `param_check`. Returns error JSON if invalid.
   2. Extracts molecule name and resolution parameter `vres`.
@@ -75,22 +85,12 @@ This repository provides the Flask back‑end for the Raston Lab [Virtual FTMW S
      }
      ```
 
-  ### `find_peaks(x_data, y_data, threshold=0, min_distance=100)`
+  `find_peaks(x_data, y_data, threshold=0, min_distance=100)`
   * Converts inputs to NumPy arrays and calls SciPy’s `find_peaks`.
   * Catches exceptions and returns an error JSON if something goes wrong.
   * Builds and returns a dictionary mapping each peak frequency (to 4 decimal places) to its intensity (to 4 decimals).
 
-## Installation
-
-```bash
-git clone https://github.com/FTMW-Scientific-Simulator/Virtual-FTMW-Spectrometer
-cd Virtual-FTMW-Functions
-python3 -m venv .venv
-pip install -r requirements.txt
-python app.py
-```
-
-## The Process - Breakdown of `app.py`
+## `app.py`
 
 This section describes how incoming requests are handled:
 
