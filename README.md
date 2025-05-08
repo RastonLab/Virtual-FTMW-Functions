@@ -65,17 +65,17 @@ python app.py
 
   `acquire_spectra(params, window=25, resolution=0.001, fwhm=0.007, Q=10000, Pmax=1.0)`
 
-  1. Validates `params` with `param_check`. Returns error JSON if invalid.
-  2. Extracts molecule name and resolution parameter `vres`.
-  3. Loads line list data via `get_datafile`, reads into a DataFrame, and filters by frequency bounds.
-  4. For each spectral line:
+  * Validates `params` with `param_check`. Returns error JSON if invalid.
+  * Extracts molecule name and resolution parameter `vres`.
+  * Loads line list data via `get_datafile`, reads into a DataFrame, and filters by frequency bounds.
+  * For each spectral line:
      * Builds a local frequency grid around the line center ± `window`.
      * Computes two Lorentzian components (Doppler‑shifted split peaks).
      * Sums them into a local spectrum.
      
-  5. Defines a global frequency grid (`crop_min` to `crop_max`) and interpolates all local spectra onto it.
-  6. Adds white noise and applies cavity mode response.
-  7. Returns JSON:
+  * Defines a global frequency grid (`crop_min` to `crop_max`) and interpolates all local spectra onto it.
+  * Adds white noise and applies cavity mode response.
+  * Returns JSON:
 
      ```json
      {
