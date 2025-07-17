@@ -126,6 +126,6 @@ def find_peaks(
     for line in lines:
         freq = x[line]
         intensity = y[line]
-        peaks[f"{freq:.4f}"] = f"{intensity:.4f}"
+        peaks[f"{float(freq):.4f}"] = f"{float(intensity):.4f}"
 
     return {"success": True, "peaks": peaks}
