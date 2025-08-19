@@ -105,7 +105,7 @@ def find_peaks(
     x_data: list[float],
     y_data: list[float],
     threshold: float = 0,
-    min_distance: int = 45,
+    min_distance: int = 40,
 ) -> dict:
     """
     Use scipy.signal.find_peaks to locate peaks in y_data above an absolute threshold.
