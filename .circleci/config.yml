@@ -18,14 +18,14 @@ jobs:
             echo "export VERSION=$VERSION" >> $BASH_ENV && \
             echo $VERSION > version.txt
       - docker/check:
-          docker-username: CIRCLE_PROJECT_USERNAME
+          docker_username: CIRCLE_PROJECT_USERNAME
           registry: ghcr.io
       - docker/build:
           image: $USER/$REPO_NAME
           tag: $VERSION
           registry: ghcr.io
       - docker/push:
-          digest-path: /tmp/digest.txt
+          digest_path: /tmp/digest.txt
           image: $USER/$REPO_NAME
           tag: $VERSION
           registry: ghcr.io
