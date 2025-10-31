@@ -1,10 +1,10 @@
 version: 2.1
 orbs:
-  docker: circleci/docker@2.2.0
+  docker: circleci/docker@3.0.1
 jobs:
   build-and-push:
     machine:
-      image: ubuntu-2004:202101-01
+      image: ubuntu-2004:current
       docker_layer_caching: false
     resource_class: arm.medium
     steps:
