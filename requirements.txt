@@ -1,11 +1,6 @@
-# used by both flask and jupyter-notebook
-specutils
-
-# used by flask
 flask
 flask-cors
-wheel
 gunicorn
-
-# additional dependency
-pydantic
+numpy
+pandas
+scipy
